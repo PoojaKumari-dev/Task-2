@@ -56,11 +56,6 @@ public class OdApiTaskService {
 		  SimpleDateFormat DateFor = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
 		  String stringDate = DateFor.format(date);
            
-		  
-		  Map<String, HashMap<String, ?>> rootMap = new HashMap<String, HashMap<String, ?>>();
-		  HashMap<String, String>  timeStamp = new  HashMap<String, String>();
-
-		  
 		  File originsfile = new File(classLoader.getResource(originsFile).getFile());
 		  OriginsRequest airportRequest = ob.readValue(originsfile,
 		  OriginsRequest.class);
@@ -75,8 +70,6 @@ public class OdApiTaskService {
 		  File routesfile = new File(classLoader.getResource(routesFile).getFile());
 		  RoutesRequest routesRequest = ob.readValue(routesfile, RoutesRequest.class);
 
-		
-		
 		  HashMap<String, AirportsResponse> OriginResponse = getOriginsData(airportRequest, countryRequest);
 		  HashMap<String, CountriesResponse> CountryResponse = getCountryData(countryRequest); 
 		  HashMap<String, RegionsResponse> regionsResponse = getRegionsData(regionsRequest); 
