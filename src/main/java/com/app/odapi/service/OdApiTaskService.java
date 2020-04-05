@@ -81,17 +81,6 @@ public class OdApiTaskService {
 		  HashMap<String, CountriesResponse> CountryResponse = getCountryData(countryRequest); 
 		  HashMap<String, RegionsResponse> regionsResponse = getRegionsData(regionsRequest); 
 		  HashMap<String, RoutesResponse> routesResponse = getRoutesData(routesRequest);
-		  //timeStamp.put("timeStamp",strDate);
-		  
-		  
-		/*  rootMap.put("Airports", OriginResponse);
-		  rootMap.put("Countries", CountryResponse);
-		  rootMap.put("Regions", regionsResponse); 
-		  rootMap.put("Routes", routesResponse);
-		  rootMap.put("TimeStamp", timeStamp);
-		  TreeMap<String, HashMap<String, ?>> sortedMap = new TreeMap<String, HashMap<String, ?>>(rootMap);
-		  String json = new ObjectMapper().writeValueAsString(sortedMap); */
-		  
 		  
 		  response.setAirports(OriginResponse);
 		  response.setCountries(CountryResponse);
