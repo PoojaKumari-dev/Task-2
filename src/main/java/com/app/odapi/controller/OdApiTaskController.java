@@ -31,7 +31,7 @@ public class OdApiTaskController {
 		}
 		catch(Exception e)
 		{
-			LOGGER.error("Exception occured while creating a Request Call: {}", e.getMessage(), e);
+			LOGGER.error("Exception occured while reading data into json file: {}", e.getMessage(), e);
 			return new ResponseEntity<>(odApiResponse,HttpStatus.INTERNAL_SERVER_ERROR);
 			
 		}
