@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.app.odapi.controller.OdApiTaskController;
 import com.app.odapi.dao.OdApiTaskDao;
 import com.app.odapi.model.AirportsRequest;
 import com.app.odapi.model.AirportsResponse;
@@ -34,9 +37,12 @@ public class OdApiTaskService {
 
 	@Autowired
 	OdApiTaskDao odApiTaskDao;
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(OdApiTaskController.class);
 
-	public OdApiResponse getAllOdApiData() throws JsonParseException, JsonMappingException, IOException {
+	public OdApiResponse getAllOdApiData() throws Exception {
 		OdApiResponse response = new OdApiResponse();
+		LOGGER.info("Calling OdApiTaskService");
 		Date date = new Date();
 		SimpleDateFormat DateFor = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
 		String stringDate = DateFor.format(date);
@@ -65,7 +71,8 @@ public class OdApiTaskService {
 		CountriesRequest countryRequest = new CountriesRequest();
 		airportRequest = odApiTaskDao.ReadOriginFile();
 		countryRequest = odApiTaskDao.ReadCountryFile();
-
+		
+		if (airportRequest != null) {
 		List<AirportsRequest> airportList = airportRequest.getAirports();
 		List<CountriesRequestData> countryList = countryRequest.getCountries();
 
@@ -117,19 +124,21 @@ public class OdApiTaskService {
 				airportMap.put(airportResponse.getCode(), airportResponse);
 			}
 
+		} 
+		} else {
+			LOGGER.error("Exception occured while reading data into origins.json file");
 		}
 
 		return airportMap;
 
 	}
 
-	public Map<String, CountriesResponse> getCountryData()
-			throws JsonParseException, JsonMappingException, IOException {
+	public Map<String, CountriesResponse> getCountryData() throws JsonParseException, JsonMappingException, IOException {
 		CountriesResponse countriesResponse = null;
 		HashMap<String, CountriesResponse> countriesMap = new HashMap<String, CountriesResponse>();
 		CountriesRequest countryRequest = new CountriesRequest();
 		countryRequest = odApiTaskDao.ReadCountryFile();
-
+		if (countryRequest != null) {
 		List<CountriesRequestData> countryList = countryRequest.getCountries();
 
 		for (CountriesRequestData country : countryList) {
@@ -139,6 +148,9 @@ public class OdApiTaskService {
 			countriesResponse.setRegionCodes(country.getRegionCodes());
 
 			countriesMap.put(countriesResponse.getCountryCode2(), countriesResponse);
+		}
+		} else {
+			LOGGER.error("Exception occured while reading data into country.json file");
 		}
 
 		return countriesMap;
@@ -150,14 +162,18 @@ public class OdApiTaskService {
 		HashMap<String, RegionsResponse> regionsMap = new HashMap<String, RegionsResponse>();
 		RegionsRequest regionsRequest = new RegionsRequest();
 		regionsRequest = odApiTaskDao.ReadRegionsFile();
+		if (regionsRequest != null) {
 		List<RegionsRequestData> regionsList = regionsRequest.getRegions();
-
 		for (RegionsRequestData region : regionsList) {
 			regionsResponse = new RegionsResponse();
 			regionsResponse.setRegionCode(region.getRegionCode());
 			regionsResponse.setRegionName(region.getRegionName());
 
 			regionsMap.put(regionsResponse.getRegionCode(), regionsResponse);
+		}
+		}
+		else {
+			LOGGER.error("Exception occured while reading data into Regions.json file");
 		}
 
 		return regionsMap;
@@ -169,31 +185,34 @@ public class OdApiTaskService {
 		HashMap<String, RoutesResponse> routesMap = new HashMap<String, RoutesResponse>();
 		RoutesRequest routesRequest = new RoutesRequest();
 		routesRequest = odApiTaskDao.ReadRoutesFile();
-		List<RoutesRequestData> routesList = routesRequest.getRoutes();
+		if (routesRequest != null) {
+			List<RoutesRequestData> routesList = routesRequest.getRoutes();
+			Map<String, DestinationProperties> rmap = new HashMap<String, DestinationProperties>();
+			for (RoutesRequestData routeReq : routesList) {
+				DestinationProperties dp = new DestinationProperties();
+				dp.setI(routeReq.isIsInterline() ? 1 : 0);
+				dp.setC(routeReq.isIsCodeShare() ? 1: 0);
+				rmap.put(routeReq.getDestinationAirportCode(), dp);
+			}
 
-		Map<String, DestinationProperties> rmap = new HashMap<String, DestinationProperties>();
-		for (RoutesRequestData routeReq : routesList) {
-			DestinationProperties dp = new DestinationProperties();
-			dp.setI(routeReq.isIsInterline() ? 1 : 0);
-			dp.setC(routeReq.isIsCodeShare() ? 1 : 0);
-			rmap.put(routeReq.getDestinationAirportCode(), dp);
+			Map<String, List<String>> destinationCode = routesList.stream()
+					.collect(Collectors.groupingBy(RoutesRequestData::getOriginAirportCode,
+							Collectors.mapping(RoutesRequestData::getDestinationAirportCode, Collectors.toList())));
+
+			for (RoutesRequestData routes : routesList) {
+				routesResponse = new RoutesResponse();
+				routesResponse.setOriginCode(routes.getOriginAirportCode());
+				routesResponse.setDestinationCodes(destinationCode.get(routes.getOriginAirportCode()));
+				routesResponse.setDestinationProperties(routesResponse.getDestinationCodes().stream()
+						.map(dcode -> rmap.get(dcode)).collect(Collectors.toList()));
+				routesMap.put(routesResponse.getOriginCode(), routesResponse);
+
+			}
 		}
-
-		Map<String, List<String>> destinationCode = routesList.stream()
-				.collect(Collectors.groupingBy(RoutesRequestData::getOriginAirportCode,
-						Collectors.mapping(RoutesRequestData::getDestinationAirportCode, Collectors.toList())));
-
-		for (RoutesRequestData routes : routesList) {
-			routesResponse = new RoutesResponse();
-			routesResponse.setOriginCode(routes.getOriginAirportCode());
-			routesResponse.setDestinationCodes(destinationCode.get(routes.getOriginAirportCode()));
-			routesResponse.setDestinationProperties(routesResponse.getDestinationCodes().stream()
-					.map(dcode -> rmap.get(dcode)).collect(Collectors.toList()));
-			routesMap.put(routesResponse.getOriginCode(), routesResponse);
-
+		else {
+			LOGGER.error("Exception occured while reading data into Routes.json file");
 		}
 		return routesMap;
-
 	}
 
 }

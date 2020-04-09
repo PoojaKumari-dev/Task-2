@@ -22,7 +22,8 @@ public class OdApiTaskController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OdApiTaskController.class);
 
 	@GetMapping(produces = "application/json")
-	public ResponseEntity<OdApiResponse> odApiTask() throws Exception {
+	public ResponseEntity<OdApiResponse> odApiTask() 
+	{
 		OdApiResponse odApiResponse = new OdApiResponse();
 		LOGGER.info("Calling odApiTask");
 		try {
