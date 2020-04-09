@@ -1,22 +1,17 @@
 package com.app.odapi.service;
 
-import java.io.File;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.app.odapi.dao.OdApiTaskDao;
 import com.app.odapi.model.AirportsRequest;
 import com.app.odapi.model.AirportsResponse;
 import com.app.odapi.model.CountriesRequest;
@@ -33,63 +28,44 @@ import com.app.odapi.model.RoutesRequestData;
 import com.app.odapi.model.RoutesResponse;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class OdApiTaskService {
 
-	@Value("${file.origins:test}")
-	private String originsFile;
-	@Value("${file.regions:test}")
-	private String regionsFile;
-	@Value("${file.countries:test}")
-	private String countriesFile;
-	@Value("${file.routes:test}")
-	private String routesFile;
+	@Autowired
+	OdApiTaskDao odApiTaskDao;
 
 	public OdApiResponse getAllOdApiData() throws JsonParseException, JsonMappingException, IOException {
-		  ClassLoader classLoader = new OdApiTaskService().getClass().getClassLoader();
-		  ObjectMapper ob = new ObjectMapper();
-		  OdApiResponse response = new OdApiResponse();
-		  
-		  Date date = new Date();
-		  SimpleDateFormat DateFor = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
-		  String stringDate = DateFor.format(date);
-           
-		  File originsfile = new File(classLoader.getResource(originsFile).getFile());
-		  OriginsRequest airportRequest = ob.readValue(originsfile,
-		  OriginsRequest.class);
-		  
-		  File countriesfile = new
-		  File(classLoader.getResource(countriesFile).getFile()); CountriesRequest
-		  countryRequest = ob.readValue(countriesfile, CountriesRequest.class);
-		  
-		  File regionsfile = new File(classLoader.getResource(regionsFile).getFile());
-		  RegionsRequest regionsRequest = ob.readValue(regionsfile,RegionsRequest.class); 
-		 
-		  File routesfile = new File(classLoader.getResource(routesFile).getFile());
-		  RoutesRequest routesRequest = ob.readValue(routesfile, RoutesRequest.class);
+		OdApiResponse response = new OdApiResponse();
+		Date date = new Date();
+		SimpleDateFormat DateFor = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+		String stringDate = DateFor.format(date);
 
-		  HashMap<String, AirportsResponse> OriginResponse = getOriginsData(airportRequest, countryRequest);
-		  HashMap<String, CountriesResponse> CountryResponse = getCountryData(countryRequest); 
-		  HashMap<String, RegionsResponse> regionsResponse = getRegionsData(regionsRequest); 
-		  HashMap<String, RoutesResponse> routesResponse = getRoutesData(routesRequest);
-		  
-		  response.setAirports(OriginResponse);
-		  response.setCountries(CountryResponse);
-		  response.setRegions(regionsResponse);
-		  response.setRouteSets(routesResponse);
-		  response.setSource("New");
-		  response.setTimeStamp(stringDate);
-		  return response;
+		Map<String, AirportsResponse> OriginResponse = getOriginsData();
+		Map<String, CountriesResponse> CountryResponse = getCountryData();
+		Map<String, RegionsResponse> regionsResponse = getRegionsData();
+		Map<String, RoutesResponse> routesResponse = getRoutesData();
+
+		response.setAirports(OriginResponse);
+		response.setAirports(OriginResponse);
+		response.setCountries(CountryResponse);
+		response.setRegions(regionsResponse);
+		response.setRouteSets(routesResponse);
+		response.setSource("New");
+		response.setTimeStamp(stringDate);
+
+		return response;
 
 	}
 
-	public HashMap<String, AirportsResponse> getOriginsData(OriginsRequest airportRequest, CountriesRequest countryRequest)
-			throws JsonParseException, JsonMappingException, IOException {
+	public Map<String, AirportsResponse> getOriginsData() throws JsonParseException, JsonMappingException, IOException {
 		AirportsResponse airportResponse = null;
 		HashMap<String, AirportsResponse> airportMap = new HashMap<String, AirportsResponse>();
-		
+		OriginsRequest airportRequest = new OriginsRequest();
+		CountriesRequest countryRequest = new CountriesRequest();
+		airportRequest = odApiTaskDao.ReadOriginFile();
+		countryRequest = odApiTaskDao.ReadCountryFile();
+
 		List<AirportsRequest> airportList = airportRequest.getAirports();
 		List<CountriesRequestData> countryList = countryRequest.getCountries();
 
@@ -147,10 +123,13 @@ public class OdApiTaskService {
 
 	}
 
-	public HashMap<String, CountriesResponse> getCountryData(CountriesRequest countryRequest)
+	public Map<String, CountriesResponse> getCountryData()
 			throws JsonParseException, JsonMappingException, IOException {
 		CountriesResponse countriesResponse = null;
 		HashMap<String, CountriesResponse> countriesMap = new HashMap<String, CountriesResponse>();
+		CountriesRequest countryRequest = new CountriesRequest();
+		countryRequest = odApiTaskDao.ReadCountryFile();
+
 		List<CountriesRequestData> countryList = countryRequest.getCountries();
 
 		for (CountriesRequestData country : countryList) {
@@ -166,9 +145,11 @@ public class OdApiTaskService {
 
 	}
 
-	public HashMap<String, RegionsResponse> getRegionsData(RegionsRequest regionsRequest) throws JsonParseException, JsonMappingException, IOException {
+	public Map<String, RegionsResponse> getRegionsData() throws JsonParseException, JsonMappingException, IOException {
 		RegionsResponse regionsResponse = null;
 		HashMap<String, RegionsResponse> regionsMap = new HashMap<String, RegionsResponse>();
+		RegionsRequest regionsRequest = new RegionsRequest();
+		regionsRequest = odApiTaskDao.ReadRegionsFile();
 		List<RegionsRequestData> regionsList = regionsRequest.getRegions();
 
 		for (RegionsRequestData region : regionsList) {
@@ -183,30 +164,31 @@ public class OdApiTaskService {
 
 	}
 
-	public HashMap<String, RoutesResponse> getRoutesData(RoutesRequest routesRequest) throws JsonParseException, JsonMappingException, IOException {
+	public Map<String, RoutesResponse> getRoutesData() throws JsonParseException, JsonMappingException, IOException {
 		RoutesResponse routesResponse = null;
 		HashMap<String, RoutesResponse> routesMap = new HashMap<String, RoutesResponse>();
+		RoutesRequest routesRequest = new RoutesRequest();
+		routesRequest = odApiTaskDao.ReadRoutesFile();
 		List<RoutesRequestData> routesList = routesRequest.getRoutes();
-		
-		Map<String,DestinationProperties> rmap=new HashMap<String,DestinationProperties>();
-		for(RoutesRequestData routeReq:routesList) {
-			DestinationProperties dp=new DestinationProperties();
-			if(routeReq.isIsInterline())
-				dp.setI(1);
-			if(routeReq.isIsCodeShare())
-				dp.setC(1);
-			rmap.put(routeReq.getDestinationAirportCode(),dp);
+
+		Map<String, DestinationProperties> rmap = new HashMap<String, DestinationProperties>();
+		for (RoutesRequestData routeReq : routesList) {
+			DestinationProperties dp = new DestinationProperties();
+			dp.setI(routeReq.isIsInterline() ? 1 : 0);
+			dp.setC(routeReq.isIsCodeShare() ? 1 : 0);
+			rmap.put(routeReq.getDestinationAirportCode(), dp);
 		}
-		
+
 		Map<String, List<String>> destinationCode = routesList.stream()
 				.collect(Collectors.groupingBy(RoutesRequestData::getOriginAirportCode,
 						Collectors.mapping(RoutesRequestData::getDestinationAirportCode, Collectors.toList())));
-		
+
 		for (RoutesRequestData routes : routesList) {
 			routesResponse = new RoutesResponse();
 			routesResponse.setOriginCode(routes.getOriginAirportCode());
 			routesResponse.setDestinationCodes(destinationCode.get(routes.getOriginAirportCode()));
-			routesResponse.setDestinationProperties(routesResponse.getDestinationCodes().stream().map(dcode-> rmap.get(dcode)).collect(Collectors.toList()));
+			routesResponse.setDestinationProperties(routesResponse.getDestinationCodes().stream()
+					.map(dcode -> rmap.get(dcode)).collect(Collectors.toList()));
 			routesMap.put(routesResponse.getOriginCode(), routesResponse);
 
 		}
