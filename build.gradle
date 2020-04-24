@@ -3,6 +3,8 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 }
+apply plugin: 'java'
+apply plugin: 'jacoco'
 
 group = 'com.app.odapi'
 version = '0.0.1-SNAPSHOT'
@@ -19,11 +21,39 @@ dependencies {
 	compile ('com.fasterxml.jackson.core:jackson-databind:2.9.8')
 	compile "io.springfox:springfox-swagger2:2.9.2"
 	compile "io.springfox:springfox-swagger-ui:2.9.2"
-	/*testImplementation('org.springframework.boot:spring-boot-starter-test') {
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	} */
+	} 
 }
+
+jacoco {
+   toolVersion = "0.8.1"
+   reportsDir = file("build/reports/jacoco")
+}
+
+jacocoTestReport {
+   reports {
+       xml.enabled false
+       csv.enabled false
+       html.destination file("build/jacocoHtml")
+   }
+   afterEvaluate {
+       classDirectories = files(classDirectories.files.collect {
+           fileTree(dir: it,
+                   exclude: ['com/j/app/odapi/model/**'      
+                   ])
+       })
+   }
 
 test {
 	useJUnitPlatform()
+	 jacoco {
+       append = false
+       destinationFile = file("build/jacoco/jacocoTest.exec")
+       classDumpDir = file("build/jacoco/classpathdumps")
+   }
+   testLogging {
+       events "passed", "skipped", "failed"
+   }
+}
 }

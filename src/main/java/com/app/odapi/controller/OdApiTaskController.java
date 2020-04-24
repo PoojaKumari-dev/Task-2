@@ -24,16 +24,14 @@ public class OdApiTaskController {
 	@GetMapping(produces = "application/json")
 	public ResponseEntity<OdApiResponse> odApiTask() 
 	{
-		OdApiResponse odApiResponse = new OdApiResponse();
 		LOGGER.info("Calling odApiTask");
 		try {
-			odApiResponse = odApiTaskService.getAllOdApiData();
-			return new ResponseEntity<>(odApiResponse,HttpStatus.OK);
+			return new ResponseEntity<>(odApiTaskService.getAllOdApiData(),HttpStatus.OK);
 		}
 		catch(Exception e)
 		{
 			LOGGER.error("Exception occured while reading data into json file: {}", e.getMessage(), e);
-			return new ResponseEntity<>(odApiResponse,HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 			
 		}
 	}

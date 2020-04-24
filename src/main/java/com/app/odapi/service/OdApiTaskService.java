@@ -53,7 +53,6 @@ public class OdApiTaskService {
 		Map<String, RoutesResponse> routesResponse = getRoutesData();
 
 		response.setAirports(OriginResponse);
-		response.setAirports(OriginResponse);
 		response.setCountries(CountryResponse);
 		response.setRegions(regionsResponse);
 		response.setRouteSets(routesResponse);
