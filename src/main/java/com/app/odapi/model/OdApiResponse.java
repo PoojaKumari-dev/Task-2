@@ -1,46 +1,46 @@
 package com.app.odapi.model;
 
-import java.util.HashMap;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Map;
 
 public class OdApiResponse {
 
 	@JsonProperty("Airports")
-	private HashMap<String, AirportsResponse> airports;
+	private Map<String, AirportsResponse> airports;
 	@JsonProperty("Countries")
-	private HashMap<String, CountriesResponse> countries;
+	private Map<String, CountriesResponse> countries;
 	@JsonProperty("Regions")
-	private HashMap<String, RegionsResponse> regions;
+	private Map<String, RegionsResponse> regions;
 	@JsonProperty("RouteSets")
-	private HashMap<String, RoutesResponse> routeSets;
+	private Map<String, RoutesResponse> routeSets;
 	@JsonProperty("Source")
 	private String source;
 	@JsonProperty("TimeStamp")
 	private String timeStamp;
 	
-	public HashMap<String, AirportsResponse> getAirports() {
+	public Map<String, AirportsResponse> getAirports() {
 		return airports;
 	}
-	public void setAirports(HashMap<String, AirportsResponse> airports) {
+	public void setAirports(Map<String, AirportsResponse> airports) {
 		this.airports = airports;
 	}
-	public HashMap<String, CountriesResponse> getCountries() {
+	public Map<String, CountriesResponse> getCountries() {
 		return countries;
 	}
-	public void setCountries(HashMap<String, CountriesResponse> countries) {
+	public void setCountries(Map<String, CountriesResponse> countries) {
 		this.countries = countries;
 	}
-	public HashMap<String, RegionsResponse> getRegions() {
+	public Map<String, RegionsResponse> getRegions() {
 		return regions;
 	}
-	public void setRegions(HashMap<String, RegionsResponse> regions) {
+	public void setRegions(Map<String, RegionsResponse> regions) {
 		this.regions = regions;
 	}
-	public HashMap<String, RoutesResponse> getRouteSets() {
+	public Map<String, RoutesResponse> getRouteSets() {
 		return routeSets;
 	}
-	public void setRouteSets(HashMap<String, RoutesResponse> routeSets) {
+	public void setRouteSets(Map<String, RoutesResponse> routeSets) {
 		this.routeSets = routeSets;
 	}
 	public String getSource() {

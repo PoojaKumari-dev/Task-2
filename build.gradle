@@ -37,23 +37,13 @@ jacocoTestReport {
        csv.enabled false
        html.destination file("build/jacocoHtml")
    }
-   afterEvaluate {
-       classDirectories = files(classDirectories.files.collect {
-           fileTree(dir: it,
-                   exclude: ['com/j/app/odapi/model/**'      
-                   ])
-       })
-   }
-
-test {
-	useJUnitPlatform()
-	 jacoco {
-       append = false
-       destinationFile = file("build/jacoco/jacocoTest.exec")
-       classDumpDir = file("build/jacoco/classpathdumps")
-   }
-   testLogging {
-       events "passed", "skipped", "failed"
-   }
 }
+test {
+    jacoco {false
+        destinationFile = file("build/jacoco/jacocoTest.exec")
+        classDumpDir = file("build/jacoco/classpathdumps")
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }

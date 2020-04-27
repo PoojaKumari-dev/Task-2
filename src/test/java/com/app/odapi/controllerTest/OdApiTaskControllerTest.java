@@ -1,15 +1,10 @@
 package com.app.odapi.controllerTest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.app.odapi.controller.OdApiTaskController;
+import com.app.odapi.model.*;
+import com.app.odapi.service.OdApiTaskService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,22 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.app.odapi.controller.OdApiTaskController;
-import com.app.odapi.model.AirportsResponse;
-import com.app.odapi.model.CountriesResponse;
-import com.app.odapi.model.DestinationProperties;
-import com.app.odapi.model.OdApiResponse;
-import com.app.odapi.model.RegionsResponse;
-import com.app.odapi.model.RoutesResponse;
-import com.app.odapi.service.OdApiTaskService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@RunWith(SpringRunner.class)
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+@RunWith(SpringJUnit4ClassRunner.class)
 @WebMvcTest(OdApiTaskController.class)
 public class OdApiTaskControllerTest {
 
